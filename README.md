@@ -1,4 +1,5 @@
 # State-Space Control & Digital Twin Simulation of an Inverted Pendulum-Cart System
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/KevG137/Inverted-Pendulum-Cart/HEAD?urlpath=notebooks%2Fcart_pendulum_lqr.ipynb)
 
 **Author:** Kevin Goguen  
 **Project Focus:** State-Space Modeling, LQR Synthesis, Dynamic Simulation & Parameter Robustness  
