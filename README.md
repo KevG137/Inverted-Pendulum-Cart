@@ -27,34 +27,46 @@ The state-space architectures and optimization methodologies executed here serve
 ### 1. State-Space Formulation
 The system monitors linear track displacement ($x$), linear cart velocity ($\dot{x}$), pendulum angular deviation from vertical ($\theta$), and angular velocity ($\dot{\theta}$):
 
-$$\vec{x} = [\theta, \dot{\theta}, x, \dot{x}]^T$$
+$$
+\vec{x} = [\theta, \dot{\theta}, x, \dot{x}]^T
+$$
 
 The highly coupled, non-linear system equations of motion derived via Lagrangian mechanics are linearized about the unstable upper equilibrium point ($\theta \approx 0, \dot{\theta} \approx 0$) to construct the continuous state-space matrices ($A$ and $B$):
 
-$$\dot{\vec{x}} = A\vec{x} + B\vec{u}$$
+$$
+\dot{\vec{x}} = A\vec{x} + B\vec{u}
+$$
 
-$$\begin{bmatrix} \dot{\theta} \\ \ddot{\theta} \\ \dot{x} \\ \ddot{x}\end{bmatrix} \approx \begin{bmatrix}
+$$
+\begin{bmatrix} \dot{\theta} \\ \ddot{\theta} \\ \dot{x} \\ \ddot{x}\end{bmatrix} \approx \begin{bmatrix}
 0 & 1 & 0 & 0 \\
 \left(1+\frac{m}{M}\right)\frac{g}{l} & 0 & 0 & 0 \\
 0 & 0 & 0 & 1 \\
 -\frac{m}{M}g & 0 & 0 & 0
 \end{bmatrix}
-\begin{bmatrix} \theta \\ \dot{\theta} \\ x \\ \dot{x} \end{bmatrix} + \begin{bmatrix} 0 \\ -\frac{1}{Ml} \\ 0 \\ \frac{1}{M} \end{bmatrix}F$$
+\begin{bmatrix} \theta \\ \dot{\theta} \\ x \\ \dot{x} \end{bmatrix} + \begin{bmatrix} 0 \\ -\frac{1}{Ml} \\ 0 \\ \frac{1}{M} \end{bmatrix}F
+$$
 
 ### 2. Optimal Feedback Synthesis (LQR)
 To track system deviations and minimize structural error, an optimal feedback gain matrix $K$ is derived via negative state feedback ($\vec{u} = -K\vec{x}$). The gain minimizes the infinite-horizon continuous cost function $J$:
 
-$$J = \int^\infty_0\left(\vec{x}^TQ\vec{x}+\vec{u}^TR\vec{u}\right)dt$$
+$$
+J = \int^\infty_0\left(\vec{x}^TQ\vec{x}+\vec{u}^TR\vec{u}\right)dt
+$$
 
 The unique positive-definite solution matrix $S$ is solved via the continuous **Algebraic Riccati Equation (ARE)** using the `python-control` library:
 
-$$SA + A^TS - SB^TR^{-1}BS + Q = 0 \quad \Rightarrow \quad K = R^{-1}B^TS$$
+$$
+SA + A^TS - SB^TR^{-1}BS + Q = 0 \quad \Rightarrow \quad K = R^{-1}B^TS
+$$
 
 ### 3. Controller Tuning & Physical Constraints
 * **Design Constraint:** The cart must remain within a physical rail safety boundary of **$\pm1.0\text{ meter}$** during tracking and disturbance rejection.
 * **Tuning Matrix Rationale:** To satisfy this constraint, the state penalty matrix $Q$ is heavily biased on the linear displacement diagonal element ($Q_{33} = 50$). This penalizes spatial travel tightly while balancing standard actuator effort penalties ($R = 1$):
 
-$$Q = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 50 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad R = 1$$
+$$
+Q = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 50 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad R = 1
+$$
 
 ---
 
@@ -64,7 +76,9 @@ Because analytical solutions to the true coupled system equations are non-existe
 
 This architecture constructs an authentic "Digital Twin" pipeline: the optimal LQR controller—designed using a *simplified, linear approximation*—is forced to regulate the *true, non-linear, coupled* physical equations of motion.
 
-$$\vec{x}(t + h) \approx \vec{x}(t) + \frac{h}{6}\left(\vec{k}_1 + 2\vec{k}_2 + 2\vec{k}_3 + \vec{k}_4\right)$$
+$$
+\vec{x}(t + h) \approx \vec{x}(t) + \frac{h}{6}\left(\vec{k}_1 + 2\vec{k}_2 + 2\vec{k}_3 + \vec{k}_4\right)
+$$
 
 ---
 
@@ -73,35 +87,57 @@ $$\vec{x}(t + h) \approx \vec{x}(t) + \frac{h}{6}\left(\vec{k}_1 + 2\vec{k}_2 + 
 ### Non-Linear Plant Physics
 Applying Lagrangian mechanics to the cart-pendulum system yields the following exact non-linear equations of motion:
 
-$$\ddot{\theta} = \frac{g\sin\theta - \cos\theta\left(\frac{F + ml\dot{\theta}^2\sin\theta}{M+m}\right)}{l\left(1 - \frac{m\cos^2\theta}{M+m}\right)}$$
+$$
+\ddot{\theta} = \frac{g\sin\theta - \cos\theta\left(\frac{F + ml\dot{\theta}^2\sin\theta}{M+m}\right)}{l\left(1 - \frac{m\cos^2\theta}{M+m}\right)}
+$$
 
-$$\ddot{x} = \frac{F + ml\dot{\theta}^2\sin\theta - ml\ddot{\theta}\cos\theta}{M+m}$$
+$$
+\ddot{x} = \frac{F + ml\dot{\theta}^2\sin\theta - ml\ddot{\theta}\cos\theta}{M+m}
+$$
 
 Assuming small angle approximations ($\theta \approx 0, \dot{\theta} \approx 0$) for linearization yields:
 
-$$\ddot{\theta} \approx \left(1+\frac{m}{M}\right)\frac{g}{l}\theta - \frac{F}{Ml}$$
+$$
+\ddot{\theta} \approx \left(1+\frac{m}{M}\right)\frac{g}{l}\theta - \frac{F}{Ml}
+$$
 
-$$\ddot{x} \approx - \frac{m}{M}g\theta + \frac{F}{M}$$
+$$
+\ddot{x} \approx - \frac{m}{M}g\theta + \frac{F}{M}
+$$
 
 ### Derivation of the Matrix State Equations
 By mapping the linearized scalar differentials back to state vector definitions, the system dynamics are isolated into explicit matrix form:
 
-$$\dot{\vec{x}} = \begin{bmatrix} \dot{\theta} \\ \ddot{\theta} \\ \dot{x} \\ \ddot{x}\end{bmatrix} \approx \begin{bmatrix} \dot{\theta} \\ \left(1+\frac{m}{M}\right)\frac{g}{l}\theta - \frac{F}{Ml} \\ \dot{x} \\ - \frac{m}{M}g\theta + \frac{F}{M} \end{bmatrix} = A\vec{x} + B\vec{u}$$
+$$
+\dot{\vec{x}} = \begin{bmatrix} \dot{\theta} \\ \ddot{\theta} \\ \dot{x} \\ \ddot{x}\end{bmatrix} \approx \begin{bmatrix} \dot{\theta} \\ \left(1+\frac{m}{M}\right)\frac{g}{l}\theta - \frac{F}{Ml} \\ \dot{x} \\ - \frac{m}{M}g\theta + \frac{F}{M} \end{bmatrix} = A\vec{x} + B\vec{u}
+$$
 
 ### Cost Optimization via Bellman's Principle of Optimality
 Assuming the optimal cost-to-go function $J^*$ is quadratic in state ($J^* = \vec{x}^TS\vec{x}$), Bellman's tracking partials are minimized with respect to control vector $\vec{u}$:
 
-$$\frac{\partial}{\partial \vec{u}}\left[\vec{x}^TQ\vec{x} + \vec{u}^TR\vec{u} + \frac{\partial J^*}{\partial \vec{x}}(A\vec{x} + B\vec{u} - \dot{\vec{x}})\right] = 0$$
+$$
+\frac{\partial}{\partial \vec{u}}\left[\vec{x}^TQ\vec{x} + \vec{u}^TR\vec{u} + \frac{\partial J^*}{\partial \vec{x}}(A\vec{x} + B\vec{u} - \dot{\vec{x}})\right] = 0
+$$
 
-$$\frac{\partial J^*}{\partial \vec{x}} = 2\vec{x}^TS \implies 2\vec{u}^TR + 2\vec{x}^TSB = 0 \implies \vec{u} = -R^{-1}B^TS\vec{x}$$
+$$
+\frac{\partial J^*}{\partial \vec{x}} = 2\vec{x}^TS \implies 2\vec{u}^TR + 2\vec{x}^TSB = 0 \implies \vec{u} = -R^{-1}B^TS\vec{x}
+$$
 
 ### RK4 Derivative Vector Stepping Function
 The time-evolution function $\frac{\partial \vec{x}}{\partial t} \equiv \vec{f}$ updates intermediate vector fields $\vec{k}_n$ across step width $h$:
 
-$$\vec{k}_1 = \vec{f}(\theta_0, \dot{\theta}_0, x_0, \dot{x}_0)$$
+$$
+\vec{k}_1 = \vec{f}(\theta_0, \dot{\theta}_0, x_0, \dot{x}_0)
+$$
 
-$$\vec{k}_2 = \vec{f}\left(\theta_0 + \frac{h}{2}k_{1,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{1,\dot{\theta}}, x_0 + \frac{h}{2}k_{1,x}, \dot{x}_0 + \frac{h}{2}k_{1,\dot{x}}\right)$$
+$$
+\vec{k}_2 = \vec{f}\left(\theta_0 + \frac{h}{2}k_{1,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{1,\dot{\theta}}, x_0 + \frac{h}{2}k_{1,x}, \dot{x}_0 + \frac{h}{2}k_{1,\dot{x}}\right)
+$$
 
-$$\vec{k}_3 = \vec{f}\left(\theta_0 + \frac{h}{2}k_{2,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{2,\dot{\theta}}, x_0 + \frac{h}{2}k_{2,x}, \dot{x}_0 + \frac{h}{2}k_{2,\dot{x}}\right)$$
+$$
+\vec{k}_3 = \vec{f}\left(\theta_0 + \frac{h}{2}k_{2,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{2,\dot{\theta}}, x_0 + \frac{h}{2}k_{2,x}, \dot{x}_0 + \frac{h}{2}k_{2,\dot{x}}\right)
+$$
 
-$$\vec{k}_4 = \vec{f}\left(\theta_0 + hk_{3,\theta}, \dot{\theta}_0 + hk_{3,\dot{\theta}}, x_0 + hk_{3,x}, \dot{x}_0 + hk_{3,\dot{x}}\right)$$
+$$
+\vec{k}_4 = \vec{f}\left(\theta_0 + hk_{3,\theta}, \dot{\theta}_0 + hk_{3,\dot{\theta}}, x_0 + hk_{3,x}, \dot{x}_0 + hk_{3,\dot{x}}\right)
+$$
