@@ -184,6 +184,10 @@ $$
 \mathbf{k}_4 = \mathbf{f}\left( \theta_0 + h k_{3,\theta}, \dot{\theta}_0 + h k_{3,\dot{\theta}}, x_0 + h k_{3,x}, \dot{x}_0 + h k_{3,\dot{x}} \right)
 $$
 
+## Simulation Animation
+
+![Cart-pendulum simulation](animation.gif)
+
 ## References
 
 1.   Lum, C. (2021). Introduction to Linear Quadratic Regulator (LQR) Control [Video]. YouTube. Available at: https://www.youtube.com/watch?v=wEevt2a4SKIBrigham 
