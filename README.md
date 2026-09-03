@@ -1,4 +1,5 @@
 # State-Space Control & Digital Twin Simulation of an Inverted Pendulum-Cart System
+
 **Author:** Kevin Goguen  
 **Project Focus:** State-Space Modeling, LQR Synthesis, Dynamic Simulation & Parameter Robustness  
 
@@ -27,46 +28,71 @@ The state-space architectures and optimization methodologies executed here serve
 ### 1. State-Space Formulation
 The system monitors linear track displacement ($x$), linear cart velocity ($\dot{x}$), pendulum angular deviation from vertical ($\theta$), and angular velocity ($\dot{\theta}$):
 
-'''math
-\vec{x} = [\theta, \dot{\theta}, x, \dot{x}]^T
-'''
+$$
+\mathbf{x} = \begin{bmatrix} \theta & \dot{\theta} & x & \dot{x} \end{bmatrix}^T
+$$
 
 The highly coupled, non-linear system equations of motion derived via Lagrangian mechanics are linearized about the unstable upper equilibrium point ($\theta \approx 0, \dot{\theta} \approx 0$) to construct the continuous state-space matrices ($A$ and $B$):
 
-'''math
-\dot{\vec{x}} = A\vec{x} + B\vec{u}
-'''
+$$
+\dot{\mathbf{x}} = A\mathbf{x} + B\mathbf{u}
+$$
 
-'''math
-\begin{bmatrix} \dot{\theta} \\ \ddot{\theta} \\ \dot{x} \\ \ddot{x}\end{bmatrix} \approx \begin{bmatrix}
+$$
+\begin{bmatrix}
+\dot{\theta} \\
+\ddot{\theta} \\
+\dot{x} \\
+\ddot{x}
+\end{bmatrix}
+\approx
+\begin{bmatrix}
 0 & 1 & 0 & 0 \\
 \left(1+\frac{m}{M}\right)\frac{g}{l} & 0 & 0 & 0 \\
 0 & 0 & 0 & 1 \\
 -\frac{m}{M}g & 0 & 0 & 0
 \end{bmatrix}
-\begin{bmatrix} \theta \\ \dot{\theta} \\ x \\ \dot{x} \end{bmatrix} + \begin{bmatrix} 0 \\ -\frac{1}{Ml} \\ 0 \\ \frac{1}{M} \end{bmatrix}F
-'''
+\begin{bmatrix}
+\theta \\
+\dot{\theta} \\
+x \\
+\dot{x}
+\end{bmatrix}
++
+\begin{bmatrix}
+0 \\
+-\frac{1}{Ml} \\
+0 \\
+\frac{1}{M}
+\end{bmatrix}
+F
+$$
 
 ### 2. Optimal Feedback Synthesis (LQR)
-To track system deviations and minimize structural error, an optimal feedback gain matrix $K$ is derived via negative state feedback ($\vec{u} = -K\vec{x}$). The gain minimizes the infinite-horizon continuous cost function $J$:
+To track system deviations and minimize structural error, an optimal feedback gain matrix $K$ is derived via negative state feedback ($\mathbf{u} = -K\mathbf{x}$). The gain minimizes the infinite-horizon continuous cost function $J$:
 
-'''math
-J = \int^\infty_0\left(\vec{x}^TQ\vec{x}+\vec{u}^TR\vec{u}\right)dt
-'''
+$$
+J = \int_{0}^{\infty} \left( \mathbf{x}^T Q \mathbf{x} + \mathbf{u}^T R \mathbf{u} \right) dt
+$$
 
 The unique positive-definite solution matrix $S$ is solved via the continuous **Algebraic Riccati Equation (ARE)** using the `python-control` library:
 
-'''math
-SA + A^TS - SB^TR^{-1}BS + Q = 0 \quad \Rightarrow \quad K = R^{-1}B^TS
-'''
+$$
+S A + A^T S - S B R^{-1} B^T S + Q = 0 \implies K = R^{-1} B^T S
+$$
 
 ### 3. Controller Tuning & Physical Constraints
-* **Design Constraint:** The cart must remain within a physical rail safety boundary of **$\pm1.0\text{ meter}$** during tracking and disturbance rejection.
+* **Design Constraint:** The cart must remain within a physical rail safety boundary of **$\pm 1.0\text{ meter}$** during tracking and disturbance rejection.
 * **Tuning Matrix Rationale:** To satisfy this constraint, the state penalty matrix $Q$ is heavily biased on the linear displacement diagonal element ($Q_{33} = 50$). This penalizes spatial travel tightly while balancing standard actuator effort penalties ($R = 1$):
 
-'''math
-Q = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 50 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}, \quad R = 1
-'''
+$$
+Q = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 50 & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}, \quad R = 1
+$$
 
 ---
 
@@ -76,9 +102,9 @@ Because analytical solutions to the true coupled system equations are non-existe
 
 This architecture constructs an authentic "Digital Twin" pipeline: the optimal LQR controller—designed using a *simplified, linear approximation*—is forced to regulate the *true, non-linear, coupled* physical equations of motion.
 
-'''math
-\vec{x}(t + h) \approx \vec{x}(t) + \frac{h}{6}\left(\vec{k}_1 + 2\vec{k}_2 + 2\vec{k}_3 + \vec{k}_4\right)
-'''
+$$
+\mathbf{x}(t + h) \approx \mathbf{x}(t) + \frac{h}{6} \left( \mathbf{k}_1 + 2\mathbf{k}_2 + 2\mathbf{k}_3 + \mathbf{k}_4 \right)
+$$
 
 ---
 
@@ -87,57 +113,71 @@ This architecture constructs an authentic "Digital Twin" pipeline: the optimal L
 ### Non-Linear Plant Physics
 Applying Lagrangian mechanics to the cart-pendulum system yields the following exact non-linear equations of motion:
 
-'''math
-\ddot{\theta} = \frac{g\sin\theta - \cos\theta\left(\frac{F + ml\dot{\theta}^2\sin\theta}{M+m}\right)}{l\left(1 - \frac{m\cos^2\theta}{M+m}\right)}
-'''
+$$
+\ddot{\theta} = \frac{g \sin\theta - \cos\theta \left( \frac{F + m l \dot{\theta}^2 \sin\theta}{M + m} \right)}{l \left( 1 - \frac{m \cos^2\theta}{M + m} \right)}
+$$
 
-'''math
-\ddot{x} = \frac{F + ml\dot{\theta}^2\sin\theta - ml\ddot{\theta}\cos\theta}{M+m}
-'''
+$$
+\ddot{x} = \frac{F + m l \dot{\theta}^2 \sin\theta - m l \ddot{\theta} \cos\theta}{M + m}
+$$
 
 Assuming small angle approximations ($\theta \approx 0, \dot{\theta} \approx 0$) for linearization yields:
 
-'''math
-\ddot{\theta} \approx \left(1+\frac{m}{M}\right)\frac{g}{l}\theta - \frac{F}{Ml}
-'''
+$$
+\ddot{\theta} \approx \left( 1 + \frac{m}{M} \right) \frac{g}{l} \theta - \frac{F}{M l}
+$$
 
-'''math
-\ddot{x} \approx - \frac{m}{M}g\theta + \frac{F}{M}
-'''
+$$
+\ddot{x} \approx -\frac{m}{M} g \theta + \frac{F}{M}
+$$
 
 ### Derivation of the Matrix State Equations
 By mapping the linearized scalar differentials back to state vector definitions, the system dynamics are isolated into explicit matrix form:
 
-'''math
-\dot{\vec{x}} = \begin{bmatrix} \dot{\theta} \\ \ddot{\theta} \\ \dot{x} \\ \ddot{x}\end{bmatrix} \approx \begin{bmatrix} \dot{\theta} \\ \left(1+\frac{m}{M}\right)\frac{g}{l}\theta - \frac{F}{Ml} \\ \dot{x} \\ - \frac{m}{M}g\theta + \frac{F}{M} \end{bmatrix} = A\vec{x} + B\vec{u}
-'''
+$$
+\dot{\mathbf{x}} =
+\begin{bmatrix}
+\dot{\theta} \\
+\ddot{\theta} \\
+\dot{x} \\
+\ddot{x}
+\end{bmatrix}
+\approx
+\begin{bmatrix}
+\dot{\theta} \\
+\left( 1 + \frac{m}{M} \right) \frac{g}{l} \theta - \frac{F}{M l} \\
+\dot{x} \\
+-\frac{m}{M} g \theta + \frac{F}{M}
+\end{bmatrix}
+= A\mathbf{x} + B\mathbf{u}
+$$
 
 ### Cost Optimization via Bellman's Principle of Optimality
-Assuming the optimal cost-to-go function $J^*$ is quadratic in state ($J^* = \vec{x}^TS\vec{x}$), Bellman's tracking partials are minimized with respect to control vector $\vec{u}$:
+Assuming the optimal cost-to-go function $J^*$ is quadratic in state ($J^* = \mathbf{x}^T S \mathbf{x}$), Bellman's tracking partials are minimized with respect to control vector $\mathbf{u}$:
 
-'''math
-\frac{\partial}{\partial \vec{u}}\left[\vec{x}^TQ\vec{x} + \vec{u}^TR\vec{u} + \frac{\partial J^*}{\partial \vec{x}}(A\vec{x} + B\vec{u} - \dot{\vec{x}})\right] = 0
-'''
+$$
+\frac{\partial}{\partial \mathbf{u}} \left[ \mathbf{x}^T Q \mathbf{x} + \mathbf{u}^T R \mathbf{u} + \frac{\partial J^*}{\partial \mathbf{x}} \left( A\mathbf{x} + B\mathbf{u} - \dot{\mathbf{x}} \right) \right] = 0
+$$
 
-'''math
-\frac{\partial J^*}{\partial \vec{x}} = 2\vec{x}^TS \implies 2\vec{u}^TR + 2\vec{x}^TSB = 0 \implies \vec{u} = -R^{-1}B^TS\vec{x}
-'''
+$$
+\frac{\partial J^*}{\partial \mathbf{x}} = 2\mathbf{x}^T S \implies 2\mathbf{u}^T R + 2\mathbf{x}^T S B = 0 \implies \mathbf{u} = -R^{-1} B^T S \mathbf{x}
+$$
 
 ### RK4 Derivative Vector Stepping Function
-The time-evolution function $\frac{\partial \vec{x}}{\partial t} \equiv \vec{f}$ updates intermediate vector fields $\vec{k}_n$ across step width $h$:
+The time-evolution function $\frac{\partial \mathbf{x}}{\partial t} \equiv \mathbf{f}$ updates intermediate vector fields $\mathbf{k}_n$ across step width $h$:
 
-'''math
-\vec{k}_1 = \vec{f}(\theta_0, \dot{\theta}_0, x_0, \dot{x}_0)
-'''
+$$
+\mathbf{k}_1 = \mathbf{f}(\theta_0, \dot{\theta}_0, x_0, \dot{x}_0)
+$$
 
-'''math
-\vec{k}_2 = \vec{f}\left(\theta_0 + \frac{h}{2}k_{1,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{1,\dot{\theta}}, x_0 + \frac{h}{2}k_{1,x}, \dot{x}_0 + \frac{h}{2}k_{1,\dot{x}}\right)
-'''
+$$
+\mathbf{k}_2 = \mathbf{f}\left( \theta_0 + \frac{h}{2}k_{1,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{1,\dot{\theta}}, x_0 + \frac{h}{2}k_{1,x}, \dot{x}_0 + \frac{h}{2}k_{1,\dot{x}} \right)
+$$
 
-'''math
-\vec{k}_3 = \vec{f}\left(\theta_0 + \frac{h}{2}k_{2,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{2,\dot{\theta}}, x_0 + \frac{h}{2}k_{2,x}, \dot{x}_0 + \frac{h}{2}k_{2,\dot{x}}\right)
-'''
+$$
+\mathbf{k}_3 = \mathbf{f}\left( \theta_0 + \frac{h}{2}k_{2,\theta}, \dot{\theta}_0 + \frac{h}{2}k_{2,\dot{\theta}}, x_0 + \frac{h}{2}k_{2,x}, \dot{x}_0 + \frac{h}{2}k_{2,\dot{x}} \right)
+$$
 
-'''math
-\vec{k}_4 = \vec{f}\left(\theta_0 + hk_{3,\theta}, \dot{\theta}_0 + hk_{3,\dot{\theta}}, x_0 + hk_{3,x}, \dot{x}_0 + hk_{3,\dot{x}}\right)
-'''
+$$
+\mathbf{k}_4 = \mathbf{f}\left( \theta_0 + h k_{3,\theta}, \dot{\theta}_0 + h k_{3,\dot{\theta}}, x_0 + h k_{3,x}, \dot{x}_0 + h k_{3,\dot{x}} \right)
+$$
