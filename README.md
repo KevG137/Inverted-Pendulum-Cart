@@ -1,4 +1,4 @@
-# State-Space Control & Digital Twin Simulation of an Inverted Pendulum-Cart System [WIP]
+# State-Space Control & Simulation of an Inverted Pendulum-Cart System
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/KevG137/Inverted-Pendulum-Cart/HEAD?urlpath=lab%2Ftree%2Fnotebooks%2FInverted_Pendulum_and_Cart.ipynb)
 
 **Author:** Kevin Goguen  
@@ -97,11 +97,11 @@ $$
 
 ---
 
-## Non-Linear Plant Simulation (Digital Twin)
+## Non-Linear Plant Simulation
 
 Because analytical solutions to the true coupled system equations are non-existent, this project implements a **4th-Order Runge-Kutta (RK4) numerical integration engine** to step the physical plant forward in time ($h = \Delta t$). 
 
-This architecture constructs an authentic "Digital Twin" pipeline: the optimal LQR controller—designed using a *simplified, linear approximation*—is forced to regulate the *true, non-linear, coupled* physical equations of motion.
+The optimal LQR controller, designed using a *simplified, linear approximation*, is forced to regulate the *true, non-linear, coupled* physical equations of motion.
 
 $$
 \mathbf{x}(t + h) \approx \mathbf{x}(t) + \frac{h}{6} \left( \mathbf{k}_1 + 2\mathbf{k}_2 + 2\mathbf{k}_3 + \mathbf{k}_4 \right)
@@ -109,7 +109,7 @@ $$
 
 ---
 
-## Deep Dive: Theoretical Background & Mathematical Derivations
+## Theoretical Background
 
 ### Non-Linear Plant Physics
 Applying Lagrangian mechanics to the cart-pendulum system yields the following exact non-linear equations of motion:
@@ -133,7 +133,7 @@ $$
 $$
 
 ### Derivation of the Matrix State Equations
-By mapping the linearized scalar differentials back to state vector definitions, the system dynamics are isolated into explicit matrix form:
+By mapping the linearized scalar differentials back to state vector definitions, the system dynamics are converted into explicit matrix form:
 
 $$
 \dot{\mathbf{x}} =
@@ -154,7 +154,7 @@ $$
 $$
 
 ### Cost Optimization via Bellman's Principle of Optimality
-Assuming the optimal cost-to-go function $J^*$ is quadratic in state ($J^* = \mathbf{x}^T S \mathbf{x}$), Bellman's tracking partials are minimized with respect to control vector $\mathbf{u}$:
+Assuming the optimal cost-to-go function $J^{\ast}$ is quadratic in state ($J^{\ast} = \mathbf{x}^T S \mathbf{x}$), Bellman's tracking partials are minimized with respect to control vector $\mathbf{u}$:
 
 $$
 \frac{\partial}{\partial \mathbf{u}} \left[ \mathbf{x}^T Q \mathbf{x} + \mathbf{u}^T R \mathbf{u} + \frac{\partial J^*}{\partial \mathbf{x}} \left( A\mathbf{x} + B\mathbf{u} - \dot{\mathbf{x}} \right) \right] = 0
