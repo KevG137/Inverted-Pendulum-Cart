@@ -182,3 +182,9 @@ $$
 $$
 \mathbf{k}_4 = \mathbf{f}\left( \theta_0 + h k_{3,\theta}, \dot{\theta}_0 + h k_{3,\dot{\theta}}, x_0 + h k_{3,x}, \dot{x}_0 + h k_{3,\dot{x}} \right)
 $$
+
+## References
+
+1.   Lum, C. (2021). Introduction to Linear Quadratic Regulator (LQR) Control [Video]. YouTube. Available at: https://www.youtube.com/watch?v=wEevt2a4SKIBrigham 
+
+2. Tedrake, R. (2024). Linear Quadratic Regulators. Underactuated Robotics: Algorithms for Walking, Running, Swimming, Flying, and Manipulation (Ch. 8). Massachusetts Institute of Technology. Available at: https://underactuated.mit.edu/lqr.html
