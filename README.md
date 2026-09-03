@@ -1,4 +1,4 @@
-# State-Space Control & Digital Twin Simulation of an Inverted Pendulum-Cart System
+# State-Space Control & Digital Twin Simulation of an Inverted Pendulum-Cart System [WIP]
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/KevG137/Inverted-Pendulum-Cart/HEAD?urlpath=lab%2Ftree%2Fnotebooks%2FInverted_Pendulum_and_Cart.ipynb)
 
 **Author:** Kevin Goguen  
