@@ -188,6 +188,10 @@ $$
 
 ![Cart-pendulum simulation](animation.gif)
 
+## Simulation Results
+
+![Cart-pendulum results](ICP_Results.png)
+
 ## References
 
 1.   Lum, C. (2021). Introduction to Linear Quadratic Regulator (LQR) Control [Video]. YouTube. Available at: https://www.youtube.com/watch?v=wEevt2a4SKIBrigham 
