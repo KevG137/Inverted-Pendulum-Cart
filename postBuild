@@ -1,0 +1,1 @@
+jupyter labextension enable @jupyter-widgets/jupyterlab-manager ipycanvas
